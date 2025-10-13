@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { FormData } from '../types';
 import { JENJANG_OPTIONS, KELAS_OPTIONS, PRAKTIK_PEDAGOGIS_OPTIONS, DIMENSI_LULUSAN_OPTIONS } from '../constants';
@@ -12,7 +11,7 @@ interface InputFormProps {
     isFormValid: boolean;
 }
 
-const FormField: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
+const FormField: React.FC<{ label: string | React.ReactNode; children: React.ReactNode }> = ({ label, children }) => (
     <div>
         <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
         {children}
@@ -116,7 +115,20 @@ export const InputForm: React.FC<InputFormProps> = ({ formData, onFormChange, on
                  <FormField label="Mata Pelajaran">
                     <TextInput name="mataPelajaran" value={formData.mataPelajaran} onChange={handleInputChange} placeholder="Contoh: Ilmu Pengetahuan Alam"/>
                 </FormField>
-                <FormField label="Capaian Pembelajaran (CP)">
+                <FormField label={
+                    <div className="flex justify-between items-center">
+                        <span>Capaian Pembelajaran (CP)</span>
+                        <a 
+                            href="https://drive.google.com/drive/folders/1XMgHH_kqHgyhlWVBBWfOIfvPA2gc8KdH?usp=sharing" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            aria-label="Buka referensi Capaian Pembelajaran di tab baru"
+                            className="text-xs text-indigo-600 hover:text-indigo-800 font-medium hover:underline"
+                        >
+                            Lihat Referensi
+                        </a>
+                    </div>
+                }>
                     <TextAreaInput name="capaianPembelajaran" value={formData.capaianPembelajaran} onChange={handleInputChange} placeholder="Salin dan tempel CP dari kurikulum"/>
                 </FormField>
                 <FormField label="Materi Pelajaran">

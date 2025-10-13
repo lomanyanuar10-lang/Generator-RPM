@@ -50,7 +50,7 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({ output, isLoading,
                 if (line.startsWith('-')) {
                     return <li key={index} className="ml-5 list-disc">{line.substring(1).trim()}</li>;
                 }
-                return <p key={index} className="mb-2">{line}</p>;
+                return <p key={index} className="mb-2 text-justify">{line}</p>;
             });
     };
 
@@ -75,7 +75,7 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({ output, isLoading,
             // FIX: Property 'replaceAll' does not exist on type 'string'. Replaced with `replace` and a global regex.
             .replace(/\*\*/g, '')
             .split('\n')
-            .map(line => `<p>${line}</p>`)
+            .map(line => `<p style="text-align: justify;">${line}</p>`)
             .join('');
         
         const signatures = `
