@@ -64,9 +64,14 @@ export const InputForm: React.FC<InputFormProps> = ({ formData, onFormChange, on
             
             <fieldset className="space-y-4 border p-4 rounded-md">
                 <legend className="text-lg font-semibold px-2">Informasi Umum</legend>
-                <FormField label="Nama Satuan Pendidikan">
-                    <TextInput name="namaSatuanPendidikan" value={formData.namaSatuanPendidikan} onChange={handleInputChange} />
-                </FormField>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField label="Nama Satuan Pendidikan">
+                        <TextInput name="namaSatuanPendidikan" value={formData.namaSatuanPendidikan} onChange={handleInputChange} />
+                    </FormField>
+                     <FormField label="Tahun Pelajaran">
+                        <TextInput name="tahunPelajaran" value={formData.tahunPelajaran} onChange={handleInputChange} placeholder="Contoh: 2024/2025" />
+                    </FormField>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField label="Nama Guru">
                         <TextInput name="namaGuru" value={formData.namaGuru} onChange={handleInputChange} />

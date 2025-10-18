@@ -1,4 +1,3 @@
-
 import { GoogleGenAI } from "@google/genai";
 import type { FormData } from '../types';
 
@@ -8,7 +7,27 @@ if (!process.env.API_KEY) {
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
+const getFase = (jenjang: string, kelas: string): string => {
+    const k = parseInt(kelas, 10);
+    if (jenjang === 'SD') {
+        if (k <= 2) return 'A';
+        if (k <= 4) return 'B';
+        if (k <= 6) return 'C';
+    }
+    if (jenjang === 'SMP') {
+        if (k <= 9) return 'D';
+    }
+    if (jenjang === 'SMA') {
+        if (k === 10) return 'E';
+        if (k >= 11) return 'F';
+    }
+    return ''; // Default case
+};
+
 const createPrompt = (formData: FormData): string => {
+  const fase = getFase(formData.jenjang, formData.kelas);
+  const alokasiWaktu = `${formData.jumlahPertemuan} Pertemuan (${formData.durasiPertemuan} per pertemuan)`;
+
   const praktikPedagogisText = formData.praktikPedagogis
     .map((p, i) => `- Pertemuan ${i + 1}: ${p}`)
     .join('\n');
@@ -24,12 +43,13 @@ Gunakan Bahasa Indonesia yang formal dan profesional. Pastikan output yang Anda 
 
 **INFORMASI PEMBELAJARAN:**
 - Nama Satuan Pendidikan: ${formData.namaSatuanPendidikan}
+- Nama Guru: ${formData.namaGuru}
 - Mata Pelajaran: ${formData.mataPelajaran}
-- Jenjang / Kelas: ${formData.jenjang} / Kelas ${formData.kelas}
-- Materi Pelajaran: ${formData.materiPelajaran}
+- Jenjang / Kelas / Fase: ${formData.jenjang} / Kelas ${formData.kelas} / Fase ${fase}
+- Tahun Pelajaran: ${formData.tahunPelajaran}
+- Alokasi Waktu: ${alokasiWaktu}
 - Capaian Pembelajaran (CP): ${formData.capaianPembelajaran}
-- Jumlah Pertemuan: ${formData.jumlahPertemuan}
-- Durasi Setiap Pertemuan: ${formData.durasiPertemuan}
+- Materi Pelajaran: ${formData.materiPelajaran}
 - Praktik Pedagogis per Pertemuan:
 ${praktikPedagogisText}
 - Dimensi Lulusan yang Dituju: ${formData.dimensiLulusan.join(', ')}
@@ -39,12 +59,16 @@ ${praktikPedagogisText}
 ---
 
 **RENCANA PEMBELAJARAN MENDALAM (RPM)**
-Mata Pelajaran: ${formData.mataPelajaran}
-Kelas / Jenjang: Kelas ${formData.kelas} / ${formData.jenjang}
-Materi Pelajaran: ${formData.materiPelajaran}
+
+Nama Sekolah      : ${formData.namaSatuanPendidikan}
+Nama Guru         : ${formData.namaGuru}
+Mata Pelajaran    : ${formData.mataPelajaran}
+Jenjang/Kelas/Fase: ${formData.jenjang} / Kelas ${formData.kelas} / Fase ${fase}
+Alokasi Waktu     : ${alokasiWaktu}
+Tahun Pelajaran   : ${formData.tahunPelajaran}
 
 **1. IDENTIFIKASI**
-   - **Siswa:** Jelaskan profil singkat siswa Kelas ${formData.kelas} ${formData.jenjang} secara umum, termasuk kemungkinan tingkat pemahaman awal dan gaya belajar mereka.
+   - **Siswa:** Jelaskan profil singkat siswa Kelas ${formData.kelas} ${formData.jenjang} (Fase ${fase}) secara umum, termasuk kemungkinan tingkat pemahaman awal dan gaya belajar mereka.
    - **Materi Pelajaran:** ${formData.materiPelajaran}
    - **Capaian Dimensi Lulusan:** ${formData.dimensiLulusan.join(', ')}
 

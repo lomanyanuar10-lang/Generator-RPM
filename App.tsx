@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { InputForm } from './components/InputForm';
 import { OutputDisplay } from './components/OutputDisplay';
@@ -14,6 +13,7 @@ const App: React.FC = () => {
     nipKepalaSekolah: '',
     tempatPembuatan: '',
     tanggalPembuatan: new Date().toISOString().split('T')[0],
+    tahunPelajaran: '2024/2025',
     jenjang: 'SD',
     kelas: '1',
     mataPelajaran: '',

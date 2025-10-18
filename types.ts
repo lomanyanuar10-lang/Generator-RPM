@@ -1,4 +1,3 @@
-
 export interface FormData {
   namaSatuanPendidikan: string;
   namaGuru: string;
@@ -7,6 +6,7 @@ export interface FormData {
   nipKepalaSekolah: string;
   tempatPembuatan: string;
   tanggalPembuatan: string;
+  tahunPelajaran: string;
   jenjang: string;
   kelas: string;
   mataPelajaran: string;
