@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useRef } from 'react';
 import type { FormData } from '../types';
 import jsPDF from 'jspdf';
@@ -23,36 +22,144 @@ const DownloadIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
+
+const formatOutputForHtml = (text: string): string => {
+    let html = '';
+    let inTable = false;
+    let tableRows: string[] = [];
+    const processedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    const lines = processedText.split('\n');
+
+    const renderTable = () => {
+        if (tableRows.length === 0) return;
+        html += '<table style="width:100%; border-collapse: collapse; border: 1px solid #dddddd; margin-top: 1em; margin-bottom: 1em; font-family: Calibri, sans-serif; font-size: 11pt;">';
+        html += '<tbody>';
+        
+        tableRows.forEach((row, rIndex) => {
+            const cells = row.split('|').slice(1, -1).map(c => c.trim());
+            if (cells.every(c => c.match(/^-+$/))) {
+                return; // Skip markdown separator line
+            }
+            const isHeader = rIndex === 0;
+            const tag = isHeader ? 'th' : 'td';
+            html += '<tr>';
+            cells.forEach(cell => {
+                html += `<${tag} style="border: 1px solid #dddddd; padding: 8px; text-align: left; ${isHeader ? 'font-weight: bold; background-color: #f2f2f2;' : ''}">${cell}</${tag}>`;
+            });
+            html += '</tr>';
+        });
+
+        html += '</tbody></table>';
+        tableRows = [];
+        inTable = false;
+    };
+
+    lines.forEach((line) => {
+        const trimmedLine = line.trim();
+        if (trimmedLine.startsWith('|') && trimmedLine.endsWith('|')) {
+            inTable = true;
+            tableRows.push(trimmedLine);
+        } else {
+            if (inTable) {
+                renderTable();
+            }
+            if (trimmedLine) {
+                 html += `<p style="margin-bottom: 0.5em; text-align: justify; font-family: Calibri, sans-serif; font-size: 11pt;">${trimmedLine}</p>`;
+            } else {
+                 html += '<br />';
+            }
+        }
+    });
+    
+    if (inTable) {
+        renderTable();
+    }
+
+    return html;
+};
+
 export const OutputDisplay: React.FC<OutputDisplayProps> = ({ output, isLoading, error, formData }) => {
     const [copyStatus, setCopyStatus] = useState('Salin Teks');
     const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
     const outputRef = useRef<HTMLDivElement>(null);
 
     const formatOutputForDisplay = (text: string) => {
-        return text
-            .split('\n')
-            .map((line, index) => {
-                line = line.trim();
-                if (line.startsWith('**') && line.endsWith('**')) {
-                    // FIX: Property 'replaceAll' does not exist on type 'string'. Replaced with `replace` and a global regex.
-                    return <h2 key={index} className="text-xl font-bold mt-4 mb-2 text-slate-800">{line.replace(/\*\*/g, '')}</h2>;
+        const elements: React.ReactNode[] = [];
+        let inTable = false;
+        let tableRows: string[] = [];
+        const lines = text.split('\n');
+
+        const renderTable = (key: string | number) => {
+            if (tableRows.length === 0) return;
+            elements.push(
+                <table key={`table-${key}`} className="w-full border-collapse border border-slate-300 my-4 text-sm">
+                    <tbody>
+                        {tableRows.map((row, rIndex) => {
+                            const cells = row.split('|').slice(1, -1).map(c => c.trim());
+                            if (cells.every(c => c.match(/^-+$/))) {
+                                return null;
+                            }
+                            const isHeader = rIndex === 0;
+                            return (
+                                <tr key={rIndex} className={rIndex % 2 !== 0 ? 'bg-slate-50' : 'bg-white'}>
+                                    {cells.map((cell, cIndex) => {
+                                        const Tag = isHeader ? 'th' : 'td';
+                                        return (
+                                            <Tag key={cIndex} className={`border border-slate-300 p-2 text-left ${isHeader ? 'font-semibold bg-slate-100' : ''}`}>
+                                                {cell}
+                                            </Tag>
+                                        );
+                                    })}
+                                </tr>
+                            );
+                        }).filter(Boolean)}
+                    </tbody>
+                </table>
+            );
+            tableRows = [];
+            inTable = false;
+        };
+
+        lines.forEach((line, index) => {
+            const trimmedLine = line.trim();
+            if (trimmedLine.startsWith('|') && trimmedLine.endsWith('|')) {
+                inTable = true;
+                tableRows.push(trimmedLine);
+            } else {
+                if (inTable) {
+                    renderTable(index);
                 }
-                if (line.startsWith('*') && line.endsWith('*')) {
-                     // FIX: Property 'replaceAll' does not exist on type 'string'. Replaced with `replace` and a global regex.
-                     return <h3 key={index} className="text-lg font-semibold mt-3 mb-1 text-slate-700">{line.replace(/\*/g, '')}</h3>;
+                if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**')) {
+                    elements.push(<h2 key={index} className="text-xl font-bold mt-6 mb-2 text-slate-800 border-b border-slate-200 pb-1">{trimmedLine.replace(/\*\*/g, '')}</h2>);
+                } else if (trimmedLine.startsWith('*') && trimmedLine.endsWith('*')) {
+                    elements.push(<h3 key={index} className="text-lg font-semibold mt-4 mb-1 text-slate-700">{trimmedLine.replace(/\*/g, '')}</h3>);
+                } else if (trimmedLine.match(/^\d\.\d\./)) { 
+                    elements.push(<h4 key={index} className="text-md font-bold mt-4 mb-1 text-slate-700">{trimmedLine}</h4>);
+                } else if (trimmedLine.match(/^\d\.\s/)) {
+                    elements.push(<h3 key={index} className="text-lg font-semibold mt-4 mb-1 text-slate-700">{trimmedLine}</h3>);
+                } else if (trimmedLine.startsWith('- **') && trimmedLine.endsWith('**')) {
+                     const parts = trimmedLine.substring(3, trimmedLine.length - 2).split(':');
+                     elements.push(
+                        <p key={index} className="mb-1">
+                            <span className="font-semibold">{parts[0]}:</span>
+                            {parts.slice(1).join(':')}
+                        </p>
+                    );
+                } else if (trimmedLine.startsWith('-')) {
+                    elements.push(<li key={index} className="ml-5 list-disc">{trimmedLine.substring(1).trim()}</li>);
+                } else if (trimmedLine) { 
+                    elements.push(<p key={index} className="mb-2 text-justify">{trimmedLine}</p>);
                 }
-                if (line.match(/^\d\.\s/)) {
-                     return <h3 key={index} className="text-lg font-semibold mt-3 mb-1 text-slate-700">{line}</h3>;
-                }
-                if (line.startsWith('- **') && line.endsWith('**')) {
-                    return <p key={index} className="mb-1"><span className="font-semibold">{line.substring(2, line.length - 2)}:</span></p>;
-                }
-                if (line.startsWith('-')) {
-                    return <li key={index} className="ml-5 list-disc">{line.substring(1).trim()}</li>;
-                }
-                return <p key={index} className="mb-2 text-justify">{line}</p>;
-            });
+            }
+        });
+
+        if (inTable) {
+            renderTable(lines.length);
+        }
+
+        return elements;
     };
+
 
     const handleCopy = useCallback(() => {
         navigator.clipboard.writeText(output).then(() => {
@@ -63,7 +170,6 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({ output, isLoading,
 
     const getFormattedDate = (dateString: string) => {
         if (!dateString) return '';
-        // Using replace to ensure date is parsed as local time, not UTC
         const date = new Date(dateString.replace(/-/g, '/'));
         return date.toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
     }
@@ -71,25 +177,21 @@ export const OutputDisplay: React.FC<OutputDisplayProps> = ({ output, isLoading,
     const handleDownload = useCallback(() => {
         const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML to Word Document</title></head><body>`;
         const footer = "</body></html>";
-        const formattedOutput = output
-            // FIX: Property 'replaceAll' does not exist on type 'string'. Replaced with `replace` and a global regex.
-            .replace(/\*\*/g, '')
-            .split('\n')
-            .map(line => `<p style="text-align: justify;">${line}</p>`)
-            .join('');
+        
+        const formattedOutput = formatOutputForHtml(output);
         
         const signatures = `
             <br/><br/><br/>
-            <table style="width:100%;">
+            <table style="width:100%; border-collapse: collapse; font-family: Calibri, sans-serif; font-size: 11pt;">
                 <tr>
-                    <td style="width:50%; text-align:left;">
+                    <td style="width:50%; text-align:left; vertical-align: top;">
                         <p>Mengetahui,</p>
                         <p>Kepala Sekolah</p>
                         <br/><br/><br/>
                         <p><strong>${formData.namaKepalaSekolah}</strong></p>
                         <p>NIP. ${formData.nipKepalaSekolah}</p>
                     </td>
-                    <td style="width:50%; text-align:right;">
+                    <td style="width:50%; text-align:right; vertical-align: top;">
                         <p>${formData.tempatPembuatan}, ${getFormattedDate(formData.tanggalPembuatan)}</p>
                         <p>Guru Mata Pelajaran</p>
                         <br/><br/><br/>
