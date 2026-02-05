@@ -1,3 +1,4 @@
+
 import { GoogleGenAI } from "@google/genai";
 import type { FormData } from '../types';
 
@@ -53,6 +54,7 @@ Gunakan Bahasa Indonesia yang formal dan profesional. Pastikan output yang Anda 
 - Praktik Pedagogis per Pertemuan:
 ${praktikPedagogisText}
 - Dimensi Lulusan yang Dituju: ${formData.dimensiLulusan.join(', ')}
+- Integrasi KKA (Keterampilan Komputasional Anak): ${formData.kka}
 
 **FORMAT OUTPUT RPM (WAJIB DIIKUTI):**
 
@@ -88,7 +90,7 @@ ${praktikPedagogisTextForOutput}
 
 ${[...Array(formData.jumlahPertemuan)].map((_, i) => `   **Pertemuan ${i + 1} (${formData.praktikPedagogis[i]})**
    - **Awal (Berkesadaran, Bermakna, Menggembirakan):** Aktivitas pembuka untuk menarik minat murid dan menghubungkan dengan materi sebelumnya.
-   - **Inti: Memahami & Mengaplikasi (Berkesadaran, Bermakna):** Kegiatan utama sesuai praktik pedagogis yang dipilih, fokus pada pemahaman konsep dan aplikasi.
+   - **Inti: Memahami & Mengaplikasi (Berkesadaran, Bermakna):** Kegiatan utama sesuai praktik pedagogis yang dipilih, fokus pada pemahaman konsep dan aplikasi. ${formData.kka !== 'Tidak ada' ? `(INSTRUKSI KKA: Integrasikan aktivitas KKA jenis "${formData.kka}" pada bagian ini)` : ''}
    - **Refleksi (Berkesadaran, Menggembirakan):** Aktivitas untuk murid merenungkan apa yang telah dipelajari dan bagaimana mereka mempelajarinya.
    - **Penutup (Berkesadaran):** Rangkuman, umpan balik, dan penyampaian informasi untuk pertemuan berikutnya.
 `).join('\n')}

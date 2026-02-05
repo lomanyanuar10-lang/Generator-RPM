@@ -1,3 +1,4 @@
+
 export interface FormData {
   namaSatuanPendidikan: string;
   namaGuru: string;
@@ -16,4 +17,5 @@ export interface FormData {
   durasiPertemuan: string;
   praktikPedagogis: string[];
   dimensiLulusan: string[];
+  kka: string;
 }

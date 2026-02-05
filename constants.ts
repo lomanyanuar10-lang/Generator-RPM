@@ -1,4 +1,5 @@
 
+
 export const JENJANG_OPTIONS = ['SD', 'SMP', 'SMA'];
 
 export const KELAS_OPTIONS: { [key: string]: string[] } = {
@@ -28,4 +29,10 @@ export const DIMENSI_LULUSAN_OPTIONS = [
   'Kemandirian',
   'Kesehatan',
   'Komunikasi',
+];
+
+export const KKA_OPTIONS = [
+  'Tidak ada',
+  'Unplug',
+  'Plug',
 ];

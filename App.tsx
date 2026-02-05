@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { InputForm } from './components/InputForm';
 import { OutputDisplay } from './components/OutputDisplay';
@@ -23,6 +24,7 @@ const App: React.FC = () => {
     durasiPertemuan: '2 x 35 menit',
     praktikPedagogis: ['Inkuiri'],
     dimensiLulusan: [],
+    kka: 'Tidak ada',
   });
   
   const [isLoading, setIsLoading] = useState(false);

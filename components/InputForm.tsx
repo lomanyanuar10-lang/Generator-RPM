@@ -1,6 +1,7 @@
+
 import React from 'react';
 import type { FormData } from '../types';
-import { JENJANG_OPTIONS, KELAS_OPTIONS, PRAKTIK_PEDAGOGIS_OPTIONS, DIMENSI_LULUSAN_OPTIONS } from '../constants';
+import { JENJANG_OPTIONS, KELAS_OPTIONS, PRAKTIK_PEDAGOGIS_OPTIONS, DIMENSI_LULUSAN_OPTIONS, KKA_OPTIONS } from '../constants';
 
 interface InputFormProps {
     formData: FormData;
@@ -147,6 +148,11 @@ export const InputForm: React.FC<InputFormProps> = ({ formData, onFormChange, on
                         <TextInput name="durasiPertemuan" value={formData.durasiPertemuan} onChange={handleInputChange} placeholder="Contoh: 2 x 45 menit"/>
                     </FormField>
                 </div>
+                <FormField label="Integrasi KKA (Keterampilan Komputasional Anak)">
+                    <select name="kka" value={formData.kka} onChange={handleInputChange} className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition">
+                        {KKA_OPTIONS.map(k => <option key={k} value={k}>{k}</option>)}
+                    </select>
+                </FormField>
             </fieldset>
 
             <fieldset className="space-y-4 border p-4 rounded-md">
